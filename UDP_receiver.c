@@ -1,9 +1,5 @@
 ﻿// UPD_receiver.cpp : Defines the entry point for the application.
 //
-//arpa / inet.h contains the declaration of char* inet_ntoa(struct in_addr in).
-//If you don't include this header your compiler will use implicit declaration int inet_ntoa(). 
-//Wrong declaration can easily lead to segfault, especially if you are on system where sizeof(int)!=sizeof(void*).
-//If you are using gcc you can add - Wall flag.gcc will warn you about using functions without explicit declaration.
 
 #include "UDP_receiver.h"
 #include <stdio.h>
@@ -56,8 +52,33 @@ void RecvEcho(int sock)
 
 int main()
 {
+	sqlite3 *db;
+	sqlite3_stmt* stmt;
+	int term_res = sqlite3_open("test.db", &db);
+	if (term_res != SQLITE_OK)//":memory:"
+	{
+		printf("Cannot open db connection: %s\n", sqlite3_errmsg(db));
+		return 1;
+	}
+	//./home/adduser/.vs/UDP_receiver/out/build/linux-debug/test.db
+	//char* sql = "CREATE TABLE Packets(Id INTEGER PRIMARY KEY, Ip TEXT, Size INT, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);";// InTime TIMESTAMP, WriteTime TIMESTAMP
+	char* sql = "INSERT INTO Packets(Ip) VALUES ('12345678');";
+	char* err_msg;
+	term_res = sqlite3_exec(db, sql, 0, 0, &err_msg);
+	if (term_res != SQLITE_OK)//":memory:"
+	{
+		printf("SQL error: %s\n", err_msg);
+		sqlite3_free(err_msg);
+		sqlite3_close(db);
+		return 1;
+	}
+
+	sqlite3_close(db);
+
+	return 0;
+
 	regex_t reg;
-	int compRes = regcomp(&reg, "^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])\.){3}((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9]))$", REG_EXTENDED);
+	int compRes = regcomp(&reg, IP_REGEX, REG_EXTENDED);
 	char IP[16];
 	while (1)
 	{
