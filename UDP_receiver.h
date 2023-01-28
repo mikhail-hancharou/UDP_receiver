@@ -1,4 +1,4 @@
-﻿// UPD_receiver.h : Include file for standard system include files,
+﻿// UDP_receiver.h : Include file for standard system include files,
 // or project specific include files.
 
 #pragma once
