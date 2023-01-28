@@ -1,9 +1,5 @@
 ﻿// UPD_receiver.cpp : Defines the entry point for the application.
 //
-//arpa / inet.h contains the declaration of char* inet_ntoa(struct in_addr in).
-//If you don't include this header your compiler will use implicit declaration int inet_ntoa(). 
-//Wrong declaration can easily lead to segfault, especially if you are on system where sizeof(int)!=sizeof(void*).
-//If you are using gcc you can add - Wall flag.gcc will warn you about using functions without explicit declaration.
 
 #include "UDP_receiver.h"
 #include <stdio.h>
