@@ -71,7 +71,7 @@ void RecvEcho(int sock, sqlite3* db, sqlite3_stmt* stmt)
 	fflush(stdout);
 }
 
-int convertToInt(const char *a)
+int ConvertToInt(const char *a)
 {
 	int i = 0;
 	int num = 0;
@@ -144,7 +144,7 @@ int main()
 			printf("Type PORT: ");
 			scanf("%s", port);
 			regRes = regexec(&reg, port, 0, NULL, 0);
-			PORT = convertToInt(port);
+			PORT = ConvertToInt(port);
 			if (regRes == 0 && PORT >= 1024 && PORT <= 65535)
 			{
 				printf("Port confirmed [%d]\n", PORT);
