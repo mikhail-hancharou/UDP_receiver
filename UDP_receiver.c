@@ -5,7 +5,7 @@
 #include "errno.h"
 #include "sqlite3.h"
 #include <netinet/in.h>
-#include <arpa/inet.h>
+#include <arpa/inet.h> //
 #include <regex.h>
 #include <stdbool.h>
 #include <string.h>
@@ -34,6 +34,21 @@ bool SendEcho(int sock, char* IP, int PORT)
 }
 #endif //  DEBUG
 
+void WriteData(sqlite3* db, time_t t, const char* sin_addr, int bytes_read)
+{
+	char sql[128];
+	char tm[20];
+	strftime(tm, sizeof(tm), "%F %T", gmtime(&t));
+	sprintf(sql, "%s'%s', %d, '%s');", SQL_INSERT_BASE, sin_addr, bytes_read, tm);
+	char* err_msg;
+	int term_res = sqlite3_exec(db, sql, 0, 0, &err_msg);
+	if (term_res != SQLITE_OK)
+	{
+		printf("SQL error: %s\n", err_msg);
+		sqlite3_free(err_msg);
+	}
+}
+
 void RecvEcho(int sock, sqlite3* db, sqlite3_stmt* stmt)
 {
 	struct sockaddr_in recvAddr;
@@ -49,18 +64,9 @@ void RecvEcho(int sock, sqlite3* db, sqlite3_stmt* stmt)
 	else
 	{
 		buf[bytes_read] = '\0';
-		printf("Received message from [%s]: %s\n",inet_ntoa(recvAddr.sin_addr), buf);
-		char sql[128];
-		char tm[20];
-		strftime(tm, sizeof(tm), "%F %T", gmtime(&t));
-		sprintf(sql, "%s'%s', %d, '%s');", SQL_INSERT_BASE, inet_ntoa(recvAddr.sin_addr), bytes_read, tm);
-		char* err_msg;
-		int term_res = sqlite3_exec(db, sql, 0, 0, &err_msg);
-		if (term_res != SQLITE_OK)
-		{
-			printf("SQL error: %s\n", err_msg);
-			sqlite3_free(err_msg);
-		}
+		char* IP = inet_ntoa(recvAddr.sin_addr);
+		printf("Received message from [%s]: %s\n", IP, buf);
+		WriteData(db, t, IP, bytes_read);
 	}
 	fflush(stdout);
 }
